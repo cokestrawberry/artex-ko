@@ -378,11 +378,10 @@ The workflow is split into five jobs.
   binary actually runs.
 - **release.** Gathers all zips, generates a `SHA256SUMS` checksum file, and creates a GitHub Release
   with the zips and the checksum attached.
-- **docker-gate.** Checks whether the `DOCKERHUB_USERNAME`/`DOCKERHUB_TOKEN` secrets are set and passes
-  that result on as the run condition for the next job.
-- **docker.** Runs only when those secrets exist; it takes the linux binaries cross-compiled by
-  binaries, builds a multi-architecture image, and pushes it to Docker Hub. When the secrets are
-  absent it is skipped, so the release CI finishes with just the binary release and no red failure.
+- **docker.** Takes the linux binaries cross-compiled by binaries, builds a multi-architecture
+  (amd64/arm64) image, and pushes it to GitHub Container Registry as `ghcr.io/jiwoochris/artex-ko`
+  with the release tag and `latest`. It logs in with the workflow's built-in `GITHUB_TOKEN` (job
+  permission `packages: write`), so no extra secrets are needed.
 
 ### 9.3 Do the build assumptions match the repository structure
 
@@ -403,12 +402,14 @@ current repository structure by reproducing the binaries job locally.
   that buildx fills in per platform during a multi-architecture build. [`.dockerignore`](.dockerignore)
   does not exclude `dist/`, so the binary is included in the build context.
 
-### 9.4 Still a pending decision: the Docker image namespace
+### 9.4 The Docker image namespace
 
-The docker job currently leaves the image name as upstream's `autumn27/artex`, and which namespace this
-fork should publish under is a separate decision (`work/DECISIONS-FOR-JIWOO.md`, item 8). Until that is
-decided, the Docker Hub secrets are not set, and in the meantime a release publishes only the binary
-zips and the checksum (the docker job is skipped).
+Images are published to `ghcr.io/jiwoochris/artex-ko`, a namespace this fork owns, and
+`docker-compose.yml` pulls that image (decided 2026-10-11, `work/DECISIONS-FOR-JIWOO.md`, item 8).
+Upstream's `autumn27/artex` has been taken down from Docker Hub and this fork has no push access to
+it, so it is no longer used. A GHCR package may be created as private on its first publish, so after
+the first release check in the package settings that it is public; if it is private,
+`docker compose pull` fails with an authentication error.
 
 ### 9.5 Verifying locally without a tag
 

@@ -98,7 +98,7 @@ ARTEX 는 **자신이 소유하거나 서면으로 명시적 허가를 받은 �
 
 > **사전 요구:** Docker 와 Docker Compose. 데이터베이스는 **PostgreSQL** 이며 compose 가 함께 띄웁니다. 탐색에는 **LLM** 이 필요합니다(`ANTHROPIC_API_KEY` 또는 `OPENAI_API_KEY`, UI 에서도 설정 가능).
 
-> **⚠️ 지금은 아래 `docker compose up -d` 빠른 시작이 바로 작동하지 않습니다.** `docker-compose.yml` 의 `artex` 서비스가 받도록 지정된 상류(원본) 이미지 `autumn27/artex` 는 현재 Docker Hub 에서 내려가 받을 수 없습니다(2026-10-09 확인). 그래서 이 명령은 이미지 pull 단계에서 `pull access denied`/`manifest unknown` 으로 실패합니다. 한국어판 화면과 출력은 아래 ["그 밖의 설치 방법"](#그-밖의-설치-방법)에 있는 **소스에서 단일 바이너리 컴파일** 경로로 빌드하면 바로 쓸 수 있습니다(현재 정상 작동을 확인했습니다). 한국어판 Docker 이미지의 배포는 준비 중입니다.
+> **이미지:** `docker-compose.yml` 의 `artex` 서비스는 이 저장소가 릴리스 태그(`v*`)마다 GitHub Container Registry 에 발행하는 한국어판 이미지 `ghcr.io/jiwoochris/artex-ko` 를 받습니다. 기본 태그는 `latest`(가장 최근 릴리스)이고, `.env` 의 `ARTEX_TAG` 로 특정 릴리스에 고정할 수 있습니다. 원본 저장소의 이미지 `autumn27/artex` 는 Docker Hub 에서 내려가 더는 쓰지 않습니다.
 
 ```bash
 git clone https://github.com/jiwoochris/artex-ko.git
@@ -109,13 +109,13 @@ docker compose up -d          # artex 이미지 + postgres 를 함께 기동
 #   /setup 은 기동 로그에 찍힌 "설정 토큰"을 요구합니다: docker compose logs artex | grep '설정 토큰'
 ```
 
-상류 이미지에는 자주 쓰는 도구(ripgrep·curl·vim·npm·nmap 등)가 들어 있고, compose 로 기동하면 `./skills` 와 `./data` 는 바인드 마운트로 호스트에 남아 컨테이너를 다시 만들어도 보존됩니다. 다만 위 경고대로 지금은 이 이미지를 받을 수 없어 이 Docker 경로를 바로 쓸 수 없으니, 한국어판은 아래 소스 컴파일 경로로 빌드하십시오.
+이미지에는 자주 쓰는 도구(ripgrep·curl·vim·npm·nmap 등)가 들어 있고, compose 로 기동하면 `./skills` 와 `./data` 는 바인드 마운트로 호스트에 남아 컨테이너를 다시 만들어도 보존됩니다.
 
 ### 그 밖의 설치 방법
 
 원본 저장소는 설치 스크립트(`./install.sh`), 사전 컴파일 바이너리(Releases), 소스 단일 바이너리 컴파일 등 여러 방법을 제공합니다. 명령과 절차는 [`README.zh.md`](README.zh.md#安装)의 "安装"(설치) 절에 정리되어 있으며, 아래 핵심만 옮깁니다.
 
-- **설치 스크립트:** `./install.sh` 를 실행하면 Docker 감지·설치 후 "① 전부 Docker" 또는 "② 로컬 컴파일 실행"을 고르게 합니다. 다만 기본값인 "① 전부 Docker" 는 위 빠른 시작과 같은 상류 이미지(`autumn27/artex`)를 받으려 하는데, 그 이미지가 현재 Docker Hub 에서 내려가 받을 수 없으므로(위 경고 참조) 이 경로는 지금 이미지 pull 에서 실패합니다. 스크립트도 그 상황을 감지하면 같은 안내를 내고 중단합니다. 한국어판 화면·출력은 "② 로컬 컴파일 실행"을 고르거나 아래 **소스에서 단일 바이너리 컴파일** 경로로 빌드하십시오.
+- **설치 스크립트:** `./install.sh` 를 실행하면 Docker 감지·설치 후 "① 전부 Docker" 또는 "② 로컬 컴파일 실행"을 고르게 합니다. "① 전부 Docker" 는 위 빠른 시작과 같은 이미지(`ghcr.io/jiwoochris/artex-ko`)를 받아 기동하고, "② 로컬 컴파일 실행"은 아래 **소스에서 단일 바이너리 컴파일**과 같은 방식으로 직접 빌드합니다.
 - **소스에서 단일 바이너리 컴파일:**
 
   ```bash

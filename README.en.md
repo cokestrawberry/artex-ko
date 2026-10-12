@@ -91,7 +91,7 @@ The original (Chinese UI) screens are available in [`README.zh.md`](README.zh.md
 
 > **Prerequisites:** Docker and Docker Compose. The database is **PostgreSQL**, brought up by compose. Exploration requires an **LLM** (`ANTHROPIC_API_KEY` or `OPENAI_API_KEY`; can also be set in the UI).
 
-> **⚠️ The `docker compose up -d` quick start below does not work right now.** The `artex` service in `docker-compose.yml` is set to pull `autumn27/artex`, the upstream (original) image, but that image has been taken down from Docker Hub and can no longer be pulled (verified 2026-10-09). As a result this command fails at the image-pull step with `pull access denied` / `manifest unknown`. To get the Korean edition's screens and output, build it via the **single-binary build from source** path under ["Other installation methods"](#other-installation-methods) below, which currently works. A Korean-edition Docker image is in the works.
+> **Image:** the `artex` service in `docker-compose.yml` pulls `ghcr.io/jiwoochris/artex-ko`, the Korean-edition image this repository publishes to GitHub Container Registry on every release tag (`v*`). The default tag is `latest` (the most recent release); set `ARTEX_TAG` in `.env` to pin a specific release. Upstream's original image `autumn27/artex` has been taken down from Docker Hub and is no longer used.
 
 ```bash
 git clone https://github.com/jiwoochris/artex-ko.git
@@ -102,13 +102,13 @@ docker compose up -d          # brings up the artex image + postgres together
 #   /setup asks for the setup token printed in the startup log: docker compose logs artex | grep '설정 토큰'
 ```
 
-The upstream image bundles common tools (ripgrep, curl, vim, npm, nmap, and more), and when brought up with compose, `./skills` and `./data` are bind-mounted to the host and survive container recreation. As noted in the warning above, though, that image currently cannot be pulled, so this Docker path is unavailable for now; build the Korean edition via the source compile below.
+The image bundles common tools (ripgrep, curl, vim, npm, nmap, and more), and when brought up with compose, `./skills` and `./data` are bind-mounted to the host and survive container recreation.
 
 ### Other installation methods
 
 Upstream provides several methods: an install script (`./install.sh`), precompiled binaries (Releases), and a single-binary build from source. The commands and full procedure are collected in the "安装" (Installation) section of [`README.zh.md`](README.zh.md#安装) (in Chinese); the essentials are reproduced below.
 
-- **Install script:** running `./install.sh` detects/installs Docker and then lets you choose "① all-in-Docker" or "② local compile and run." Note that the default "① all-in-Docker" tries to pull the same upstream image (`autumn27/artex`) as the quick start above, but that image has been taken down from Docker Hub (see the warning above), so this path currently fails at the image-pull step; the script detects this and prints the same notice before stopping. To get the Korean edition's screens and output, choose "② local compile and run" or use the **single-binary build from source** path below.
+- **Install script:** running `./install.sh` detects/installs Docker and then lets you choose "① all-in-Docker" or "② local compile and run." "① all-in-Docker" pulls and starts the same image as the quick start above (`ghcr.io/jiwoochris/artex-ko`), while "② local compile and run" builds it yourself the same way as the **single-binary build from source** below.
 - **Single-binary build from source:**
 
   ```bash

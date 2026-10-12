@@ -26,6 +26,7 @@ import { Field, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { useAgentNameByKey } from "@/lib/agent-i18n";
 import { api } from "@/lib/api";
 import type {
   InterceptApprovalFilter,
@@ -300,6 +301,7 @@ export function ApprovalDetail({
   onResolved?: (status: "allowed" | "denied" | "timeout") => void;
 }) {
   const t = useTranslations("approval");
+  const agentNameOf = useAgentNameByKey();
   const [detail, setDetail] = React.useState<InterceptDetail | null>(null);
   const [error, setError] = React.useState("");
   const [retry, setRetry] = React.useState(0);
@@ -339,7 +341,8 @@ export function ApprovalDetail({
   const command = typeof row.tool_input?.command === "string" ? row.tool_input.command : undefined;
   let initialLabel = source(row) === "model" ? t("modelInitial") : t("ruleInitial");
   if (audit?.model_fallback) initialLabel = t("modelFallback");
-  const agentName = current.agent_name || current.conv_agent_key || t("agentFallback");
+  const agentName =
+    current.agent_name || (current.conv_agent_key && agentNameOf(current.conv_agent_key)) || t("agentFallback");
 
   return (
     <div className="flex min-w-0 flex-col gap-4 p-3 sm:p-5">
@@ -568,6 +571,7 @@ function ApprovalTable({
   label: string;
 }) {
   const t = useTranslations("approval");
+  const agentNameOf = useAgentNameByKey();
   const [expanded, setExpanded] = React.useState<Set<number>>(() => new Set());
   const columns = React.useSyncExternalStore(subscribeColumns, visibleColumnCount, serverColumnCount);
   const prefix = React.useId();
@@ -632,7 +636,7 @@ function ApprovalTable({
                       <ApprovalOrigin row={row} />
                     </span>
                     <span className="truncate text-muted-foreground text-xs">
-                      {row.agent_name || row.conv_agent_key}
+                      {row.agent_name || (row.conv_agent_key && agentNameOf(row.conv_agent_key))}
                     </span>
                   </div>
                 </TableCell>

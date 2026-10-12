@@ -3699,5 +3699,51 @@
       "min": "{n}min",
       "hour": "{n}h"
     }
+  },
+  "builtinAgents": {
+    "goals": {
+      "name": "Goal Decomposition",
+      "description": "Breaks the pentest objective down into several independent, verifiable sub-goals.",
+      "vars": {
+        "EngagementDescription": "Engagement description (target / background)"
+      }
+    },
+    "planner": {
+      "name": "Planning",
+      "description": "Reads the situation and decides on goals, adding exploration intents only when there is a genuinely uncovered new direction (one planning loop per task).",
+      "vars": {
+        "Goal": "Overall task goal",
+        "AssetSummary": "Asset count / type-distribution summary (optional)"
+      }
+    },
+    "mainagent": {
+      "name": "Main",
+      "description": "Human-machine interface: watches progress and turns human intent into hints or high-priority intents.",
+      "vars": {
+        "Goal": "Current task goal",
+        "AssetSummary": "Opening-situation summary (optional)",
+        "FindingsSummary": "Confirmed-findings summary (optional)"
+      }
+    },
+    "worker": {
+      "name": "Execution",
+      "description": "Picks up a single intent and executes it, writing discovered facts / vulnerabilities back to the knowledge graph before stopping.",
+      "vars": {
+        "ProxyAddr": "Recording proxy address (drives the if-branch wording)",
+        "WorkerName": "Worker self-identifier (optional)"
+      }
+    },
+    "auto": {
+      "name": "Auto",
+      "description": "Platform operations assistant: uses tools to manage tasks (create / view / pause / hint) and assets, and can create or modify skills, custom tools, and MCP."
+    },
+    "pentest": {
+      "name": "Penetration Test",
+      "description": "Standalone pentest agent: single-handedly runs the full chain from recon → attack-surface discovery → deep exploitation → verification → wrap-up, planning, executing, and adversarially verifying on its own."
+    },
+    "retester": {
+      "name": "Vulnerability Retest",
+      "description": "Launched manually from a finding's detail view; reads the original evidence and saves an independent retest conclusion."
+    }
   }
 }

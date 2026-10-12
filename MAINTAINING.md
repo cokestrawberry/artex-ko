@@ -353,11 +353,10 @@ git push origin v0.3.15
   돌려 바이너리가 실제로 실행되는지 확인합니다.
 - **release.** 모든 zip 을 모아 `SHA256SUMS` 체크섬을 만들고, GitHub Release 를 생성해 zip 과
   체크섬을 첨부합니다.
-- **docker-gate.** `DOCKERHUB_USERNAME`·`DOCKERHUB_TOKEN` 시크릿이 설정돼 있는지 확인해 그
-  결과를 다음 잡의 실행 조건으로 넘깁니다.
-- **docker.** 위 시크릿이 있을 때만 돌며, binaries 가 교차 컴파일한 linux 바이너리를 받아
-  멀티아키텍처 이미지를 빌드하고 Docker Hub 에 올립니다. 시크릿이 없으면 이 잡을 건너뛰어,
-  릴리스 CI 는 빨간 실패 없이 바이너리 릴리스만으로 끝납니다.
+- **docker.** binaries 가 교차 컴파일한 linux 바이너리를 받아 멀티아키텍처(amd64·arm64) 이미지를
+  빌드하고 GitHub Container Registry 의 `ghcr.io/jiwoochris/artex-ko` 에 릴리스 태그와 `latest`
+  로 올립니다. 로그인은 워크플로 기본 `GITHUB_TOKEN`(잡 권한 `packages: write`)으로 하므로 따로
+  둘 시크릿이 없습니다.
 
 ### 9.3 빌드 전제가 저장소 구조와 맞는가
 
@@ -379,12 +378,13 @@ git push origin v0.3.15
   [`.dockerignore`](.dockerignore) 는 `dist/` 를 제외하지 않으므로 바이너리가 빌드 컨텍스트에
   포함됩니다.
 
-### 9.4 아직 결정 전인 것: Docker 이미지 네임스페이스
+### 9.4 Docker 이미지 네임스페이스
 
-docker 잡은 현재 이미지 이름을 상류의 `autumn27/artex` 로 두고 있고, 이 포크를 어느
-네임스페이스로 발행할지는 별도 결정 사안입니다(`work/DECISIONS-FOR-JIWOO.md` 8번 항목). 결정이
-서기 전까지는 Docker Hub 시크릿을 두지 않으며, 그동안 릴리스는 바이너리 zip 과 체크섬만
-발행합니다(docker 잡은 건너뜁니다).
+이미지는 이 포크가 소유한 `ghcr.io/jiwoochris/artex-ko` 로 발행하고, `docker-compose.yml` 도 이
+이미지를 받습니다(2026-10-11 결정, `work/DECISIONS-FOR-JIWOO.md` 8번 항목). 상류의
+`autumn27/artex` 는 Docker Hub 에서 내려갔고 이 포크에는 push 권한도 없어 쓰지 않습니다.
+GHCR 패키지는 처음 발행될 때 비공개로 만들어질 수 있으니, 첫 릴리스 뒤 패키지 설정에서 공개
+(public)인지 확인합니다. 비공개면 `docker compose pull` 이 인증 오류로 실패합니다.
 
 ### 9.5 태그 없이 로컬에서 미리 검증하기
 

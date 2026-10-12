@@ -15,7 +15,9 @@ services:
     restart: unless-stopped
 
   artex:
-    image: autumn27/artex:${ARTEX_TAG:-latest}
+    # 이 포크가 릴리스 태그(v*)마다 GitHub Container Registry 에 발행하는 이미지입니다
+    # (.github/workflows/release.yml 의 docker 잡). 상류 autumn27/artex 는 Docker Hub 에서 내려갔습니다.
+    image: ghcr.io/jiwoochris/artex-ko:${ARTEX_TAG:-latest}
     depends_on:
       postgres:
         condition: service_healthy

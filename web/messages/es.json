@@ -3699,5 +3699,51 @@
       "min": "{n} min",
       "hour": "{n} h"
     }
+  },
+  "builtinAgents": {
+    "goals": {
+      "name": "Descomposición de objetivos",
+      "description": "Descompone el objetivo de la prueba de penetración en varios subobjetivos independientes y verificables.",
+      "vars": {
+        "EngagementDescription": "Descripción del encargo (objetivo / contexto)"
+      }
+    },
+    "planner": {
+      "name": "Planificación",
+      "description": "Lee la situación y determina objetivos, añadiendo intenciones de exploración solo cuando hay una dirección nueva realmente no cubierta (un bucle de planificación por tarea).",
+      "vars": {
+        "Goal": "Objetivo general de la tarea",
+        "AssetSummary": "Resumen de recuento / distribución por tipo de activos (opcional)"
+      }
+    },
+    "mainagent": {
+      "name": "Principal",
+      "description": "Interfaz persona-máquina: observa el progreso y convierte la intención humana en pistas o intenciones de alta prioridad.",
+      "vars": {
+        "Goal": "Objetivo actual de la tarea",
+        "AssetSummary": "Resumen de la situación inicial (opcional)",
+        "FindingsSummary": "Resumen de hallazgos confirmados (opcional)"
+      }
+    },
+    "worker": {
+      "name": "Ejecución",
+      "description": "Toma una sola intención y la ejecuta, registrando los hechos / vulnerabilidades descubiertos en el grafo de conocimiento antes de detenerse.",
+      "vars": {
+        "ProxyAddr": "Dirección del proxy de registro (determina el texto de la rama if)",
+        "WorkerName": "Identificador propio del worker (opcional)"
+      }
+    },
+    "auto": {
+      "name": "Auto",
+      "description": "Asistente de operaciones de la plataforma: usa herramientas para gestionar tareas (crear / ver / pausar / dar pistas) y activos, y puede crear o modificar skills, herramientas personalizadas y MCP."
+    },
+    "pentest": {
+      "name": "Prueba de penetración",
+      "description": "Agente de pentest autónomo: ejecuta por sí solo toda la cadena, desde reconocimiento → descubrimiento de superficie de ataque → explotación profunda → verificación → cierre, planificando, ejecutando y verificando de forma adversaria por su cuenta."
+    },
+    "retester": {
+      "name": "Reverificación de vulnerabilidad",
+      "description": "Se inicia manualmente desde el detalle de un hallazgo; lee la evidencia original y guarda una conclusión de reverificación independiente."
+    }
   }
 }

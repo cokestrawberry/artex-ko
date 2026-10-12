@@ -43,8 +43,8 @@ update_docker(){
   # up 하면 pg 가 안 떠 있을 때 자동으로 띄우고, 이미 떠 있으면 그대로 두고 재구성하지 않습니다.
   info "새 이미지를 받습니다(artex 만)…"
   if ! docker compose pull artex; then
-    warn "상류 이미지 autumn27/artex 를 Docker Hub 에서 받을 수 없습니다(현재 상류에서 내려간 상태라 pull 이 거부됩니다)"
-    die "Docker 이미지 업데이트 경로는 현재 사용할 수 없습니다. 한국어판은 \"2) 로컬 업데이트(go 로 다시 컴파일)\" 로 빌드하세요"
+    warn "이미지 ghcr.io/jiwoochris/artex-ko 를 받지 못했습니다(지정한 tag 가 발행된 릴리스 태그인지, 네트워크가 되는지 확인하세요)"
+    die "이미지 업데이트에 실패했습니다. \"2) 로컬 업데이트(go 로 다시 컴파일)\" 로도 업데이트할 수 있습니다"
   fi
   info "재구성 후 시작합니다(artex 는 재시작 시 schema 를 자동으로 마이그레이션합니다)…"
   docker compose up -d artex

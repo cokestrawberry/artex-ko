@@ -3699,5 +3699,51 @@
       "min": "{n} 分钟",
       "hour": "{n} 小时"
     }
+  },
+  "builtinAgents": {
+    "goals": {
+      "name": "目标拆解",
+      "description": "把渗透任务目标拆解成若干独立、可验证的子目标。",
+      "vars": {
+        "EngagementDescription": "任务描述（测试对象/背景）"
+      }
+    },
+    "planner": {
+      "name": "规划",
+      "description": "读取态势、判定目标，只在确有未覆盖的新方向时补充探索意图（每任务一个规划循环）。",
+      "vars": {
+        "Goal": "任务总目标",
+        "AssetSummary": "资产计数/类型分布摘要(可选)"
+      }
+    },
+    "mainagent": {
+      "name": "主",
+      "description": "人机接口：观察进展，把人的意图落成 hint 或高优先级意图。",
+      "vars": {
+        "Goal": "当前任务目标",
+        "AssetSummary": "开局态势摘要(可选)",
+        "FindingsSummary": "已确认漏洞摘要(可选)"
+      }
+    },
+    "worker": {
+      "name": "执行",
+      "description": "领取一条意图执行，把发现的事实/漏洞写回知识图谱后停止。",
+      "vars": {
+        "ProxyAddr": "记录代理地址(驱动 if 双文案)",
+        "WorkerName": "worker 自我标识(可选)"
+      }
+    },
+    "auto": {
+      "name": "Auto",
+      "description": "平台操作助手：用工具管理任务(建/看/暂停/给提示)与资产，并可创建/修改 skill、自定义工具、MCP。"
+    },
+    "pentest": {
+      "name": "渗透测试",
+      "description": "独立渗透 agent：一人从侦察→找攻击面→深入利用→验证→收尾走完整条链，自己规划、自己执行、自己对抗式验证。"
+    },
+    "retester": {
+      "name": "漏洞复测",
+      "description": "从漏洞详情手动启动，读取原证据并保存独立复测结论。"
+    }
   }
 }

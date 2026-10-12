@@ -35,6 +35,7 @@ import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { useAgentLabels } from "@/lib/agent-i18n";
 import { api } from "@/lib/api";
 import type {
   Agent,
@@ -58,6 +59,7 @@ const TRAFFIC_TOOL_KEYS = new Set(["traffic_search", "traffic_get"]);
 // Tools. Config + prompt save as before; visibility + tool bindings toggle live.
 export function AgentEditor({ agentKey, onSaved }: { agentKey: string; onSaved?: () => void }) {
   const tr = useTranslations("agentEditor");
+  const agentLabels = useAgentLabels();
   const [detail, setDetail] = React.useState<AgentDetail | null>(null);
   const [versions, setVersions] = React.useState<PromptVersion[]>([]);
   const [variables, setVariables] = React.useState<PromptVar[]>([]);
@@ -441,7 +443,9 @@ export function AgentEditor({ agentKey, onSaved }: { agentKey: string; onSaved?:
                     </button>
                   </TooltipTrigger>
                   <TooltipContent className="max-w-xs">
-                    <p className="font-medium">{v.description}</p>
+                    <p className="font-medium">
+                      {agentLabels.varLabel(agentKey, !!detail?.agent?.builtin, v.name, v.description)}
+                    </p>
                     <p className="text-muted-foreground mt-1">{tr("prompt.example", { example: v.example })}</p>
                   </TooltipContent>
                 </Tooltip>
