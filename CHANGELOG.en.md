@@ -10,7 +10,7 @@ The upstream ARTEX project's per-version release history (0.3.x and earlier) and
 
 ### Fixed
 
-- Distinguish task report loading failures from empty reports and offer a retry button. Late responses from a previous task cannot replace the current task report.
+- **Distinguish task report loading failures from empty reports and offer a retry button.** Late responses from a previous task cannot replace the current task report.
 
 ### Localization (i18n)
 
