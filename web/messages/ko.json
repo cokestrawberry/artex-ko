@@ -264,6 +264,8 @@
       "title": "침투 테스트 보고서 (Markdown)",
       "copy": "복사",
       "loading": "불러오는 중…",
+      "loadError": "보고서를 불러오지 못했습니다. 다시 시도해 주세요.",
+      "retry": "다시 시도",
       "empty": "보고서가 없습니다",
       "copySuccess": "Markdown 을 복사했습니다",
       "copyError": "복사에 실패했습니다. 텍스트를 직접 선택해 복사하세요"

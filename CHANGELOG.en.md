@@ -11,6 +11,7 @@ The upstream ARTEX project's per-version release history (0.3.x and earlier) and
 ### Fixed
 
 - **Files in skill subdirectories can now be opened and deleted on Windows.** The server listed skill file paths with the Windows separator (`\`), so opening or deleting a file inside a skill subdirectory from the web UI failed with a 400 error. The file list and the path check now both use `/`, so these files open and delete normally. The path validation rules (allowed characters, `..` and absolute-path rejection) are unchanged.
+- **Show an error message and a Retry button when a task report fails to load, instead of showing it as an empty report.** An empty report still shows "No report available". When another task is selected, the previous task's report and Copy button are hidden while the new report loads.
 
 ### Localization (i18n)
 

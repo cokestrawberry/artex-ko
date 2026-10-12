@@ -264,6 +264,8 @@
       "title": "渗透测试报告（Markdown）",
       "copy": "复制",
       "loading": "加载中…",
+      "loadError": "无法加载报告，请重试。",
+      "retry": "重试",
       "empty": "暂无报告",
       "copySuccess": "已复制 Markdown",
       "copyError": "复制失败，请手动选择文本复制"
