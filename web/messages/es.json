@@ -264,6 +264,8 @@
       "title": "Informe de test de penetración (Markdown)",
       "copy": "Copiar",
       "loading": "Cargando…",
+      "loadError": "No se pudo cargar el informe. Inténtelo de nuevo.",
+      "retry": "Reintentar",
       "empty": "No hay informe",
       "copySuccess": "Markdown copiado",
       "copyError": "Error al copiar. Seleccione el texto manualmente y cópielo"
