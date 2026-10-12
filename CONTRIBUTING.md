@@ -76,7 +76,7 @@ ARTEX 는 LLM 멀티 에이전트가 **자율적으로** 침투 테스트를 수
 ### 요구 버전
 
 - Go 1.26 이상 (`go.mod` 기준)
-- Node.js 22 이상 (릴리스 워크플로 기준)
+- Node.js 22.22.2 이상 (web 단위 테스트가 쓰는 jsdom 의 요구 버전 기준, CI·릴리스 워크플로는 Node 22)
 - Docker 와 Docker Compose (로컬 실행·검증용)
 
 ### 백엔드 (Go)
@@ -142,11 +142,13 @@ npm ci
 npm run dev          # 개발 서버
 npm run build        # 프로덕션 빌드
 npm run build:static # 정적 내보내기 빌드(머지 게이트 · TypeScript 타입 검사 포함)
+npm test -- --run    # Vitest 단위 테스트(머지 게이트)
+npm run check:i18n   # en·zh·es 메시지 키가 ko.json 과 같은지 검사(머지 게이트)
 npm run check        # Biome 린트·포맷 검사(정보용 · 선재 부채로 아직 머지 게이트 아님)
 npm run check:fix    # 자동 수정
 ```
 
-로컬에 Node(요구 버전 20+)가 없거나 설치된 네이티브 의존성이 플랫폼과 맞지 않으면 Docker
+로컬에 Node(요구 버전 22.22.2+)가 없거나 설치된 네이티브 의존성이 플랫폼과 맞지 않으면 Docker
 로 동일하게 검증할 수 있습니다. `node_modules` 를 named volume 에 두면 호스트의 플랫폼용
 바이너리(예: `@parcel/watcher`·Biome)와 섞이지 않고 재실행도 빨라집니다. 이 저장소의 web
 검증은 CI 와 같은 이 방식으로 합니다.
@@ -177,7 +179,9 @@ docker compose up -d     # artex + postgres 기동 → http://localhost:8787
    `docs/...`, `i18n/...` 처럼 변경 성격을 앞에 둡니다.
 3. 변경을 작성하고 **해당 범위의 검증을 직접 돌립니다.** Go 변경이면 위의
    `build`·`vet`·`test` 를 통과시킵니다. web 변경이면 `npm run build:static`
-   (머지 게이트 · TypeScript 타입 검사를 함께 수행합니다)을 통과시킵니다.
+   (머지 게이트 · TypeScript 타입 검사를 함께 수행합니다)을 통과시킵니다. 단위 테스트
+   (`npm test -- --run`)와 언어별 메시지 키 검사(`npm run check:i18n`)도 머지 게이트이므로 함께
+   통과시킵니다.
    `npm run check`(Biome)는 상류에서 딸려온 선재 린트 부채가 남아 있어 아직 머지
    게이트가 아니고 `web.yml` 에서 정보용 단계로만 돌리므로, 전체를 통과시킬 필요는
    없습니다. 대신 **내 변경이 새 오류를 더하지 않았는지**만 확인하면 됩니다(커밋할 때
