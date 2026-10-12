@@ -4,7 +4,7 @@ import { diffKeys, flattenKeys, isInSync } from "./i18n-keys";
 import { readFileSync } from "node:fs";
 import path from "node:path";
 
-const MESSAGES_DIR = path.resolve(process.cwd(), "messages");
+const MESSAGES_DIR = path.resolve(__dirname, "../../messages");
 const LOCALES = ["ko", "en", "zh", "es"] as const;
 
 function readKeys(locale: string): Set<string> {
