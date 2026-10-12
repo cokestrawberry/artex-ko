@@ -85,7 +85,7 @@ The original (Chinese) is preserved as `finding-traffic-evidence-zh.md` in the s
 ### Required versions
 
 - Go 1.26 or later (per `go.mod`)
-- Node.js 22 or later (per the release workflow)
+- Node.js 22.22.2 or later (per jsdom, which the web unit tests use; CI and the release workflow run Node 22)
 - Docker and Docker Compose (for local runs and verification)
 
 ### Backend (Go)
@@ -152,11 +152,13 @@ npm ci
 npm run dev          # dev server
 npm run build        # production build
 npm run build:static # static-export build (merge gate; includes TypeScript type checking)
+npm test -- --run    # Vitest unit tests (merge gate)
+npm run check:i18n   # check that en/zh/es message keys match ko.json (merge gate)
 npm run check        # Biome lint/format check (informational; not a merge gate yet, due to pre-existing debt)
 npm run check:fix    # auto-fix
 ```
 
-If you do not have Node (version 20+) locally, or the installed native dependencies do not
+If you do not have Node (version 22.22.2+) locally, or the installed native dependencies do not
 match your platform, you can verify the same way with Docker. Keeping `node_modules` in a named
 volume avoids clashing with your host's platform binaries (for example `@parcel/watcher` and
 Biome) and makes re-runs faster. This repository verifies web the same way as CI.
@@ -187,7 +189,9 @@ docker compose up -d     # start artex + postgres → http://localhost:8787
    the change, as in `feat/...`, `fix/...`, `docs/...`, `i18n/...`.
 3. Write the change and **run the relevant verification yourself.** For a Go change, make the
    `build`/`vet`/`test` above pass. For a web change, make `npm run build:static` pass (it also
-   performs the merge gate and the TypeScript type checking). `npm run check` (Biome) still has
+   performs the merge gate and the TypeScript type checking). The unit tests
+   (`npm test -- --run`) and the message key check (`npm run check:i18n`) are merge gates too, so
+   make them pass as well. `npm run check` (Biome) still has
    pre-existing lint debt inherited from upstream and is not a merge gate yet — `web.yml` runs it
    only as an informational step — so you do not need to make all of it pass. Instead, just
    confirm that **your change does not add new errors** (when you commit, `lint-staged`
