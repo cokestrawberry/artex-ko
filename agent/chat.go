@@ -170,6 +170,7 @@ func (c *ChatAgent) Chat(ctx context.Context, agentKey, sessionID, message strin
 	// 实验功能:开启后由 noa 接管上下文压缩(归档集中在 <workDir>/noa/<SessionID> 下,持久)。
 	enableNoa(&opts, c.noaEnabledFn, c.workDir, "chat-"+sessionID, noaWarn("chat-"+sessionID))
 	ctx = attachSideCapture(ctx, &opts)
+	ctx = withToolAliases(ctx, &opts)
 	s := agentcore.NewSession(opts)
 	defer s.Close()
 	// reload prior conversation so the agent has context across turns (each Chat is

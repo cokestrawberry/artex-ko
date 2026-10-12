@@ -54,7 +54,25 @@ func newGuard(ic *intercept.Interceptor) *Guard {
 // Hooks returns the hook registry to attach to an agent session.
 func (g *Guard) Hooks() *hook.Registry { return g.reg }
 
+type toolAliasesKey struct{}
+
+// WithToolAliases attaches a session's alias→canonical tool-name map (bash→Bash).
+// The guard resolves every call through it first, so intercept rules, the judge,
+// the audit log and failure attribution see the tool they were configured for.
+func WithToolAliases(ctx context.Context, aliases map[string]string) context.Context {
+	return context.WithValue(ctx, toolAliasesKey{}, aliases)
+}
+
+func canonicalToolName(ctx context.Context, name string) string {
+	aliases, _ := ctx.Value(toolAliasesKey{}).(map[string]string)
+	if c, ok := aliases[name]; ok {
+		return c
+	}
+	return name
+}
+
 func (g *Guard) preToolUse(ctx context.Context, ev hook.Event) hook.Result {
+	ev.ToolName = canonicalToolName(ctx, ev.ToolName)
 	// Extract the shell-command surface for the audit log: Bash + the interactive-shell
 	// tools (shell_open's command, shell_send's text). Destructive/exfil gating is no
 	// longer hard-coded here — it now lives in the DB intercept rules, evaluated by
@@ -154,8 +172,8 @@ var reBlocked = regexp.MustCompile(`(?i)\b(403|forbidden|waf|blocked|rate.?limit
 // postToolUse is the Observer failure-attribution hook (G5): it classifies tool
 // results into blocked / error / ok so the planner can change strategy instead
 // of giving up at a WAF.
-func (g *Guard) postToolUse(_ context.Context, ev hook.Event) hook.Result {
-	if ev.ToolName != "Bash" {
+func (g *Guard) postToolUse(ctx context.Context, ev hook.Event) hook.Result {
+	if canonicalToolName(ctx, ev.ToolName) != "Bash" {
 		return hook.Result{}
 	}
 	class := "ok"

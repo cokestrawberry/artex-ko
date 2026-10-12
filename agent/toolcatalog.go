@@ -5,6 +5,8 @@ import (
 	"encoding/json"
 	"strings"
 
+	"github.com/Autumn-27/artex/guard"
+	"github.com/Autumn-27/norma/agentcore"
 	actool "github.com/Autumn-27/norma/tool"
 )
 
@@ -259,30 +261,55 @@ func camelToSnake(s string) string {
 	return b.String()
 }
 
-// addToolAliases registers drift-tolerant aliases for every CamelCase tool. Each
-// alias is added to the returned tool list (so exact-match dispatch finds it) and
-// its name is appended to deferred (so the schema is withheld and the model keeps
-// seeing only the official CamelCase names — no duplicate exposure, no token
-// waste). Names already taken by a real tool are skipped, so nothing is shadowed.
-func addToolAliases(tools []actool.CoreTool, deferred []string) ([]actool.CoreTool, []string) {
+// addToolAliases appends an alias for each CamelCase tool in tools and sessionTools
+// (agentcore adds the latter itself, so only their aliases are returned), defers each
+// alias so the model sees only official names, and returns the alias→canonical map.
+func addToolAliases(tools, sessionTools []actool.CoreTool, deferred []string) ([]actool.CoreTool, []string, map[string]string) {
+	all := append(append([]actool.CoreTool(nil), tools...), sessionTools...)
 	taken := map[string]bool{}
-	for _, t := range tools {
+	for _, t := range all {
 		taken[t.Name()] = true
 	}
 	for _, n := range deferred {
 		taken[n] = true
 	}
-	out := tools
-	extra := deferred
-	for _, t := range tools {
+	aliases := map[string]string{}
+	for _, t := range all {
 		for _, alias := range toolAliasNames(t.Name()) {
 			if taken[alias] {
 				continue
 			}
 			taken[alias] = true
-			out = append(out, &aliasTool{CoreTool: t, name: alias})
-			extra = append(extra, alias)
+			tools = append(tools, &aliasTool{CoreTool: t, name: alias})
+			deferred = append(deferred, alias)
+			aliases[alias] = t.Name()
 		}
 	}
-	return out, extra
+	return tools, deferred, aliases
+}
+
+// sessionAddedTools mirrors the CamelCase tools agentcore.NewSession (norma v0.4.3)
+// adds on its own. They keep no state beyond the shared TodoStore and per-call
+// ToolContext, so a second instance behind an alias behaves like agentcore's.
+func sessionAddedTools(opts agentcore.Options) []actool.CoreTool {
+	var out []actool.CoreTool
+	if opts.EnableWebFetch {
+		out = append(out, actool.NewWebFetch(actool.WebFetchConfig{Proxy: opts.WebFetchProxy, CACert: opts.WebFetchCACert, InsecureTLS: opts.WebFetchInsecureTLS}))
+	}
+	if opts.Todos != nil {
+		out = append(out, opts.Todos.Tool())
+	}
+	if !actool.BackgroundTasksDisabled() && !opts.DisableBackgroundTasks {
+		out = append(out, actool.NewTaskOutput(), actool.NewTaskStop(), actool.NewTaskList(), actool.NewMonitor())
+	}
+	return out
+}
+
+// withToolAliases registers drift aliases for every CamelCase tool the session will
+// hold and returns ctx carrying the alias→canonical map, so the guard evaluates an
+// aliased call as its canonical tool. Call it once opts is final, before NewSession.
+func withToolAliases(ctx context.Context, opts *agentcore.Options) context.Context {
+	var aliases map[string]string
+	opts.Tools, opts.DeferredTools, aliases = addToolAliases(opts.Tools, sessionAddedTools(*opts), opts.DeferredTools)
+	return guard.WithToolAliases(ctx, aliases)
 }
