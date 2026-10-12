@@ -11,6 +11,7 @@ The upstream ARTEX project's per-version release history (0.3.x and earlier) and
 ### Fixed
 
 - **Files in skill subdirectories can now be opened and deleted on Windows.** The server listed skill file paths with the Windows separator (`\`), so opening or deleting a file inside a skill subdirectory from the web UI failed with a 400 error. The file list and the path check now both use `/`, so these files open and delete normally. The path validation rules (allowed characters, `..` and absolute-path rejection) are unchanged.
+- **Built-in tools called by a lowercase or snake_case name now run the intended tool under the same interception checks as the original name.** When the model called `Bash`, `WebFetch`, `TodoWrite`, `Read`, or `LS` as `bash`, `BASH`, `web_fetch`, `webfetch`, `todo_write`, or `ls`, the call was rejected with `unknown tool`. These names are now registered as aliases of the original tool, and the model's tool list still shows only the original names. A call that arrives under an alias is handled under the original name by interception rules, model judgment, the audit log, and failure attribution, so a rule set on `Bash` also applies to a `bash` call, and approval/intercept records show the original name.
 
 ### Localization (i18n)
 
