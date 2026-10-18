@@ -2,12 +2,12 @@
 
 [한국어](CONTRIBUTING.md) · English
 
-Thank you for your interest in the global edition of ARTEX (`artex-global`). This document
+Thank you for your interest in the Korean edition of ARTEX (`artex-ko`). This document
 gathers the scope, policies, and procedures you should know before you start contributing.
 Before you send a contribution, please read [Authorized use and legal responsibility](#authorized-use-and-legal-responsibility)
 and [Localization policy](#localization-policy) first.
 
-- To report a bug or suggest a feature → use the [issue templates](https://github.com/jiwoochris/artex-global/issues/new/choose).
+- To report a bug or suggest a feature → use the [issue templates](https://github.com/jiwoochris/artex-ko/issues/new/choose).
 - If you find a translation or localization error → use the "translation/localization error" issue template.
 - If you find a security vulnerability → **do not open a public issue**; follow the procedure in [SECURITY.en.md](SECURITY.en.md).
 - Everyone who takes part must follow the [Code of Conduct (CODE_OF_CONDUCT.en.md)](CODE_OF_CONDUCT.en.md).
@@ -28,7 +28,7 @@ testing **autonomously**. Contributors are bound by the same scope limits as use
   network without authorization, or causing a disruption to it, violates the Act on Promotion
   of Information and Communications Network Utilization and Information Protection; and any
   personal data collected or exposed falls under the Personal Information Protection Act. The
-  full notice is in the [README](README.md#️-read-first--authorized-use-and-legal-notice).
+  full notice is in the [README](README.en.md#️-read-first--authorized-use-and-legal-notice).
 
 Legal responsibility for how the code or documentation you contribute is used rests with the
 user who runs it. This repository is provided "AS IS."
@@ -46,7 +46,7 @@ this policy can degrade performance, so we do not accept them.
   The behavior benchmarked in the original language (Chinese) must be preserved. This body
   lives in `agent/promptcatalog.go` and the DB seed (`agent_prompts`). Translating it causes
   drift in the agent's judgment.
-- **Only user-facing output is forced into the selected language (English by default).** This covers detection findings
+- **Only user-facing output is forced into Korean.** This covers detection findings
   (`report_finding`), fact summaries (`record_fact`), the final report, and chat responses.
   The enforcement is a code-fixed tail called `langDirective()` in `agent/prompt.go`, appended
   to the end of each role's system prompt. To change the output language, modify this function.
@@ -63,7 +63,7 @@ this policy can degrade performance, so we do not accept them.
   reports and summaries to the original language (Chinese), so do not judge whether a translation
   is applied correctly from a cheap model's output alone. The `max_tokens` pitfall when using
   OpenAI-family models is covered in the
-  [README's "Model selection and output language" section](README.md#model-selection-and-output-language).
+  [README's "Model selection and output language" section](README.en.md#model-selection-and-output-language).
 - **The procedure for keeping up with upstream changes is in the maintainer document.** When
   the original ARTEX is updated, the runbook for distinguishing preserved assets from
   translation targets, reflecting them, and checking translation symmetry and drift is in
@@ -85,7 +85,7 @@ The original (Chinese) is preserved as `finding-traffic-evidence-zh.md` in the s
 ### Required versions
 
 - Go 1.26 or later (per `go.mod`)
-- Node.js 22 or later (per the release workflow)
+- Node.js 22.22.2 or later (per jsdom, which the web unit tests use; CI and the release workflow run Node 22)
 - Docker and Docker Compose (for local runs and verification)
 
 ### Backend (Go)
@@ -152,11 +152,13 @@ npm ci
 npm run dev          # dev server
 npm run build        # production build
 npm run build:static # static-export build (merge gate; includes TypeScript type checking)
+npm test -- --run    # Vitest unit tests (merge gate)
+npm run check:i18n   # check that en/zh/es message keys match ko.json (merge gate)
 npm run check        # Biome lint/format check (informational; not a merge gate yet, due to pre-existing debt)
 npm run check:fix    # auto-fix
 ```
 
-If you do not have Node (version 20+) locally, or the installed native dependencies do not
+If you do not have Node (version 22.22.2+) locally, or the installed native dependencies do not
 match your platform, you can verify the same way with Docker. Keeping `node_modules` in a named
 volume avoids clashing with your host's platform binaries (for example `@parcel/watcher` and
 Biome) and makes re-runs faster. This repository verifies web the same way as CI.
@@ -187,7 +189,9 @@ docker compose up -d     # start artex + postgres → http://localhost:8787
    the change, as in `feat/...`, `fix/...`, `docs/...`, `i18n/...`.
 3. Write the change and **run the relevant verification yourself.** For a Go change, make the
    `build`/`vet`/`test` above pass. For a web change, make `npm run build:static` pass (it also
-   performs the merge gate and the TypeScript type checking). `npm run check` (Biome) still has
+   performs the merge gate and the TypeScript type checking). The unit tests
+   (`npm test -- --run`) and the message key check (`npm run check:i18n`) are merge gates too, so
+   make them pass as well. `npm run check` (Biome) still has
    pre-existing lint debt inherited from upstream and is not a merge gate yet — `web.yml` runs it
    only as an informational step — so you do not need to make all of it pass. Instead, just
    confirm that **your change does not add new errors** (when you commit, `lint-staged`

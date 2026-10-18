@@ -24,6 +24,7 @@ function TaskReport({ taskId }: { taskId: string }) {
   const [state, setState] = React.useState<ReportState>({ status: "loading" });
   const [attempt, setAttempt] = React.useState(0);
   const [copied, setCopied] = React.useState(false);
+  const contentRef = React.useRef<HTMLDivElement>(null);
   const report = state.status === "ready" ? state.text : "";
 
   // biome-ignore lint/correctness/useExhaustiveDependencies: attempt intentionally restarts the request after an explicit retry.
@@ -44,6 +45,8 @@ function TaskReport({ taskId }: { taskId: string }) {
   }, [taskId, attempt]);
 
   function retry() {
+    // The Retry button unmounts while loading; without this, focus falls back to <body>.
+    contentRef.current?.focus();
     setState({ status: "loading" });
     setAttempt((current) => current + 1);
   }
@@ -73,11 +76,8 @@ function TaskReport({ taskId }: { taskId: string }) {
     );
   } else if (state.status === "error") {
     content = (
-      <div
-        role="alert"
-        className="flex flex-col items-center justify-center gap-2 rounded-md border border-dashed py-16 text-sm"
-      >
-        <p>{t("loadError")}</p>
+      <div className="flex flex-col items-center justify-center gap-2 rounded-md border border-dashed py-16 text-sm">
+        <p role="alert">{t("loadError")}</p>
         <Button size="sm" variant="outline" onClick={retry}>
           {t("retry")}
         </Button>
@@ -112,7 +112,9 @@ function TaskReport({ taskId }: { taskId: string }) {
           )}
         </div>
       </CardHeader>
-      <CardContent>{content}</CardContent>
+      <CardContent ref={contentRef} tabIndex={-1}>
+        {content}
+      </CardContent>
     </Card>
   );
 }
