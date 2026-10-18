@@ -26,6 +26,12 @@ func TestMain(m *testing.M) {
 	// background loop itself, so disable it suite-wide for determinism; the
 	// loop's dispatch is covered through direct stepRealtime/stepDigest calls.
 	os.Setenv(notifyBackgroundDisabledEnv, "1")
+	// The server suite verifies the Korean localization of user-facing output,
+	// so pin the default output language to Korean for the whole test binary.
+	// Production defaults to English (config.DefaultLanguage); individual tests
+	// that need another language set it explicitly (t.Setenv / the settings table).
+	os.Setenv("ARTEX_LANG", "ko")
+
 
 	dsn, _, err := db.DSN()
 	if err != nil {

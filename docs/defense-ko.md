@@ -1,6 +1,6 @@
 # 자율 AI 공격 방어·탐지 가이드
 
-> 이 문서는 ARTEX 와 같은 **자율 AI 침투 에이전트**가 어떻게 동작하는지 방어하는 쪽에서 이해하고, 그 공격을 **탐지하고 차단하는 역량**을 기르기 위한 자료입니다. 공격 방법을 안내하는 문서가 아닙니다. 모든 내용은 자신이 소유하거나 서면으로 명시적 허가를 받은 시스템을 지키는 목적에만 사용하십시오. 권한 없이 타인의 정보통신망을 점검·공격하는 행위는 그 자체로 범죄입니다([상위 README 의 보안·오남용 경고](../README.md) 참조).
+> 이 문서는 ARTEX 와 같은 **자율 AI 침투 에이전트**가 어떻게 동작하는지 방어하는 쪽에서 이해하고, 그 공격을 **탐지하고 차단하는 역량**을 기르기 위한 자료입니다. 공격 방법을 안내하는 문서가 아닙니다. 모든 내용은 자신이 소유하거나 서면으로 명시적 허가를 받은 시스템을 지키는 목적에만 사용하십시오. 권한 없이 타인의 정보통신망을 점검·공격하는 행위는 그 자체로 범죄입니다([상위 README 의 보안·오남용 경고](../README.ko.md) 참조).
 >
 > English: **[Defense and Detection Guide (defense-en.md)](defense-en.md)**.
 
@@ -10,7 +10,7 @@
 
 ## 1. 자율 AI 공격은 기존 스캐너와 무엇이 다른가
 
-전통적인 취약점 스캐너(예: 고정 시그니처 기반 도구)는 미리 정해진 점검 항목을 순서대로 던지고 끝납니다. ARTEX 류의 자율 에이전트는 구조가 다릅니다. [시스템 아키텍처](../README.md#시스템-아키텍처)에서 설명하듯, 다음 요소가 결합해 **사람 개입 없이 여러 단계의 공격 체인을 완주**합니다.
+전통적인 취약점 스캐너(예: 고정 시그니처 기반 도구)는 미리 정해진 점검 항목을 순서대로 던지고 끝납니다. ARTEX 류의 자율 에이전트는 구조가 다릅니다. [시스템 아키텍처](../README.ko.md#시스템-아키텍처)에서 설명하듯, 다음 요소가 결합해 **사람 개입 없이 여러 단계의 공격 체인을 완주**합니다.
 
 - **역할이 나뉜 멀티 에이전트.** 목표를 분해하는 `goals`, 다음 방향을 판정해 의도(intent)를 내보내는 `planner`, 의도 하나를 실제 도구로 실행하는 `worker` 여러 개, 사람이 끼어드는 `mainagent` 로 나뉩니다. planner 가 유일한 의도 생성자이고, worker 들이 그 의도를 병렬로 수행합니다.
 - **이중 그래프에 상태를 축적.** "무엇이 있는가"(자산 그래프)와 "어디까지 테스트했는가"(탐색 그래프)를 따로 쌓고 앵커로 연결합니다. 그래서 공격이 **점진적으로 깊어지고**, 같은 자산을 다른 각도에서 재방문하며, 앞선 관찰 위에 다음 단계를 세웁니다.
@@ -155,9 +155,9 @@ description: |
     signature; tune the count and window to your own baseline. On its own this leg is low signal
     and earns weight only inside the correlation below.
 references:
-    - https://github.com/jiwoochris/artex-ko/blob/main/docs/defense-ko.md
-    - https://github.com/jiwoochris/artex-ko/blob/main/docs/defense-en.md
-author: artex-ko defense guide (generic template)
+    - https://github.com/jiwoochris/artex-global/blob/main/docs/defense-ko.md
+    - https://github.com/jiwoochris/artex-global/blob/main/docs/defense-en.md
+author: artex-global defense guide (generic template)
 date: 2026-10-07
 tags:
     - attack.reconnaissance
@@ -185,9 +185,9 @@ description: |
     correlation below. Extend the marker list to your own probe corpus and WAF categories; it is
     a coarse proxy for the broader "adapts requests to responses" behaviour the guide describes.
 references:
-    - https://github.com/jiwoochris/artex-ko/blob/main/docs/defense-ko.md
-    - https://github.com/jiwoochris/artex-ko/blob/main/docs/defense-en.md
-author: artex-ko defense guide (generic template)
+    - https://github.com/jiwoochris/artex-global/blob/main/docs/defense-ko.md
+    - https://github.com/jiwoochris/artex-global/blob/main/docs/defense-en.md
+author: artex-global defense guide (generic template)
 date: 2026-10-07
 tags:
     - attack.initial-access
@@ -218,9 +218,9 @@ description: |
     often expose weaker identity-verification endpoints than the main service and belong here
     too. This leg is broad by design and is only meaningful inside the correlation below.
 references:
-    - https://github.com/jiwoochris/artex-ko/blob/main/docs/defense-ko.md
-    - https://github.com/jiwoochris/artex-ko/blob/main/docs/defense-en.md
-author: artex-ko defense guide (generic template)
+    - https://github.com/jiwoochris/artex-global/blob/main/docs/defense-ko.md
+    - https://github.com/jiwoochris/artex-global/blob/main/docs/defense-en.md
+author: artex-global defense guide (generic template)
 date: 2026-10-07
 tags:
     - attack.credential-access
@@ -256,9 +256,9 @@ description: |
     session identifier if you have one) and tune the window to your baseline. If three legs are
     too strict and miss cases, relax to any two of the three.
 references:
-    - https://github.com/jiwoochris/artex-ko/blob/main/docs/defense-ko.md
-    - https://github.com/jiwoochris/artex-ko/blob/main/docs/defense-en.md
-author: artex-ko defense guide (generic template)
+    - https://github.com/jiwoochris/artex-global/blob/main/docs/defense-ko.md
+    - https://github.com/jiwoochris/artex-global/blob/main/docs/defense-en.md
+author: artex-global defense guide (generic template)
 date: 2026-10-07
 tags:
     - attack.initial-access
@@ -380,8 +380,8 @@ ARTEX 연루가 의심될 때 가장 먼저 확인할 것을 순서로 정리합
 
 ## 참고
 
-- 원본 프로젝트: [Autumn-27/ARTEX](https://github.com/Autumn-27/ARTEX) (AGPL-3.0 · 현재 접속 불가, 2026-10 확인). 이 문서는 그 한국어판 저장소의 방어 자료입니다.
-- 상위 [README 의 보안·오남용 경고와 사용 범위·국내법 고지](../README.md).
+- 원본 프로젝트: [Autumn-27/ARTEX](https://github.com/Autumn-27/ARTEX) (AGPL-3.0 · 현재 접속 불가, 2026-10 확인). 이 문서는 그 글로벌판 저장소의 방어 자료입니다.
+- 상위 [README 의 보안·오남용 경고와 사용 범위·국내법 고지](../README.ko.md).
 - 이 판본은 한국 사용자를 위한 현지화본이며, 개인정보가 결부된 경우에는 「정보통신망 이용촉진 및 정보보호 등에 관한 법률」과 「개인정보 보호법」이 함께 적용됩니다. 그와 무관하게 권한 없는 점검은 대부분의 관할에서 범죄가 되므로, 반드시 서면 허가와 합의된 범위를 먼저 확보한 뒤에 진행하십시오.
 - 일반 웹 보안 하드닝의 표준 참고: [OWASP Top 10](https://owasp.org/www-project-top-ten/), [OWASP ASVS(애플리케이션 보안 검증 표준)](https://owasp.org/www-project-application-security-verification-standard/), [OWASP API Security Top 10](https://api-security.owasp.org/).
 

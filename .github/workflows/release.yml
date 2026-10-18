@@ -107,7 +107,7 @@ jobs:
       contents: read
       packages: write
     env:
-      IMAGE_NAMESPACE: ghcr.io/jiwoochris/artex-ko
+      IMAGE_NAMESPACE: ghcr.io/jiwoochris/artex-global
     steps:
       - uses: actions/checkout@v4 # Dockerfile 과 skills/ 를 가져온다
       - uses: actions/download-artifact@v4

@@ -37,13 +37,14 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Sheet, SheetContent, SheetFooter, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
+import { getDateLocale } from "@/i18n/datetime";
 import { ApiError, api } from "@/lib/api";
 import type { Agent, MCPServer, MissingSkill, SkillCall, SkillItem } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
 function fmtTime(ts: string | undefined, never: string) {
   if (!ts) return never;
-  return new Date(ts).toLocaleString("ko-KR", {
+  return new Date(ts).toLocaleString(getDateLocale(), {
     month: "2-digit",
     day: "2-digit",
     hour: "2-digit",

@@ -4,12 +4,12 @@
 
 This document lays out the procedure a **maintainer** follows to keep up with changes in the
 upstream repository [Autumn-27/ARTEX](https://github.com/Autumn-27/ARTEX) (currently unreachable, checked 2026-10) while maintaining the
-Korean localization. Contribution scope, legal responsibility, and the localization policy live in
-[CONTRIBUTING.en.md](CONTRIBUTING.en.md); user-facing guidance lives in [README.en.md](README.en.md).
+the global (multilingual) edition. Contribution scope, legal responsibility, and the localization policy live in
+[CONTRIBUTING.en.md](CONTRIBUTING.en.md); user-facing guidance lives in [README.md](README.md).
 This document therefore focuses solely on **how that policy is actually enforced**.
 
 The core goal of the localization can be summed up in one sentence: **preserve the original's
-judgment performance exactly, while translating only the user-facing output into Korean**. That
+judgment performance exactly, while translating only the user-facing output into the selected language (English by default)**. That
 boundary is easy to blur every time upstream updates, so the procedures and checks below prevent
 translation drift.
 
@@ -17,7 +17,7 @@ translation drift.
 
 ## 1. The localization structure at a glance
 
-This repository **forks** upstream ARTEX and stacks Korean localization commits on top of its
+This repository **forks** upstream ARTEX and stacks multilingual-localization commits on top of its
 history. Every commit on upstream `main` is contained in this repository's history, with the
 localization commits added above them. Bringing in an upstream change therefore becomes a matter of
 "inspecting the difference against upstream `main`, then separating what to preserve from what to
@@ -28,8 +28,8 @@ The deliverables fall into three groups.
 - **Assets kept in the original language** (section 2). Translating them breaks performance or the
   ability to diff against upstream.
 - **Output-language enforcement fixed in code.** `langDirective()` in `agent/prompt.go` appends to
-  the end of each role's system prompt the instruction "write user-facing output in Korean."
-- **User-facing strings that are translated into Korean.** The UI lives in `web/messages/ko.json`;
+  the end of each role's system prompt the instruction "write user-facing output in the selected language."
+- **User-facing strings translated for each display language.** The UI strings live in `web/messages/{en,ko,zh,es}.json`;
   the server's user-facing response strings live in named constants in each Go file.
 
 ---
@@ -279,7 +279,7 @@ reverts.
 ### 8.1 Check the repository's CI status by specifying the repository
 
 This repository is a fork of upstream ARTEX, so the local `git remote` has both `origin`
-(jiwoochris/artex-ko) and `upstream` (Autumn-27/ARTEX) registered (see section 3). In this state, if
+(jiwoochris/artex-global) and `upstream` (Autumn-27/ARTEX) registered (see section 3). In this state, if
 you do not specify a repository in a `gh` command, `gh` **picks the upstream repository as the
 default** and shows you run results from upstream, which does not have our workflows. You can then see
 upstream CI green and **mistakenly think our CI passed**, or judge our workflows (`ci.yml`,
@@ -288,8 +288,8 @@ upstream CI green and **mistakenly think our CI passed**, or judge our workflows
 So when checking CI, always name the repository explicitly.
 
 ```bash
-gh run list -R jiwoochris/artex-ko --workflow ci.yml --limit 5
-gh run list -R jiwoochris/artex-ko --workflow detections.yml --limit 5
+gh run list -R jiwoochris/artex-global --workflow ci.yml --limit 5
+gh run list -R jiwoochris/artex-global --workflow detections.yml --limit 5
 ```
 
 Once set, you can make `gh` default to our repository even when you omit `-R`. Note, however, that
@@ -297,8 +297,8 @@ this setting is a **local gh setting** and is not committed to the repository, s
 again on a new machine or a new checkout.
 
 ```bash
-gh repo set-default jiwoochris/artex-ko
-gh repo set-default --view   # check that jiwoochris/artex-ko shows up
+gh repo set-default jiwoochris/artex-global
+gh repo set-default --view   # check that jiwoochris/artex-global shows up
 ```
 
 ### 8.2 Check external links in documents with GET, like a browser
@@ -379,7 +379,7 @@ The workflow is split into five jobs.
 - **release.** Gathers all zips, generates a `SHA256SUMS` checksum file, and creates a GitHub Release
   with the zips and the checksum attached.
 - **docker.** Takes the linux binaries cross-compiled by binaries, builds a multi-architecture
-  (amd64/arm64) image, and pushes it to GitHub Container Registry as `ghcr.io/jiwoochris/artex-ko`
+  (amd64/arm64) image, and pushes it to GitHub Container Registry as `ghcr.io/jiwoochris/artex-global`
   with the release tag and `latest`. It logs in with the workflow's built-in `GITHUB_TOKEN` (job
   permission `packages: write`), so no extra secrets are needed.
 
@@ -404,7 +404,7 @@ current repository structure by reproducing the binaries job locally.
 
 ### 9.4 The Docker image namespace
 
-Images are published to `ghcr.io/jiwoochris/artex-ko`, a namespace this fork owns, and
+Images are published to `ghcr.io/jiwoochris/artex-global`, a namespace this fork owns, and
 `docker-compose.yml` pulls that image (decided 2026-10-11, `work/DECISIONS-FOR-JIWOO.md`, item 8).
 Upstream's `autumn27/artex` has been taken down from Docker Hub and this fork has no push access to
 it, so it is no longer used. A GHCR package may be created as private on its first publish, so after

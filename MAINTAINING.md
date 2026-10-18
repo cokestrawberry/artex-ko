@@ -3,12 +3,12 @@
 한국어 · [English](MAINTAINING.en.md)
 
 이 문서는 **메인테이너**가 원본 저장소 [Autumn-27/ARTEX](https://github.com/Autumn-27/ARTEX)(현재 접속 불가, 2026-10 확인)의
-변경을 따라잡으면서 한국어 현지화를 유지하는 절차를 정리한 것입니다. 기여 범위·법적 책임·
-현지화 방침은 [CONTRIBUTING.md](CONTRIBUTING.md)에, 사용자용 안내는 [README.md](README.md)에
+변경을 따라잡으면서 다국어 현지화를 유지하는 절차를 정리한 것입니다. 기여 범위·법적 책임·
+현지화 방침은 [CONTRIBUTING.md](CONTRIBUTING.md)에, 사용자용 안내는 [README.ko.md](README.ko.md)에
 있으므로, 이 문서는 그 방침을 **실제로 어떻게 집행하는지**에만 집중합니다.
 
 현지화의 핵심 목표는 한 문장으로 요약됩니다. 원본의 **판단 성능을 그대로 보존하면서 사용자에게
-보이는 산출물만 한국어로 바꾸는 것**입니다. 상류가 갱신될 때마다 이 경계가 흐트러지기 쉬우므로,
+보이는 산출물만 설정한 언어로 바꾸는 것**입니다. 상류가 갱신될 때마다 이 경계가 흐트러지기 쉬우므로,
 아래 절차와 검사로 번역 드리프트를 막습니다.
 
 ---
@@ -254,7 +254,7 @@ chore(upstream): 상류 d003372..b55ceb1 반영 (intercept 토큰 계량) + 신�
 
 ### 8.1 저장소 CI 상태는 저장소를 지정해서 확인합니다
 
-이 저장소는 상류 ARTEX 의 포크라서, 로컬 `git remote` 에 `origin`(jiwoochris/artex-ko)과
+이 저장소는 상류 ARTEX 의 포크라서, 로컬 `git remote` 에 `origin`(jiwoochris/artex-global)과
 `upstream`(Autumn-27/ARTEX)이 함께 등록되어 있습니다(3절 참조). 이 상태에서 `gh` 명령에
 저장소를 지정하지 않으면, `gh` 가 **상류 저장소를 기본값으로 골라** 우리 워크플로가 없는
 상류의 실행 결과를 보여 줍니다. 그러면 상류 CI 가 초록인 것을 보고 **우리 CI 가 통과했다고
@@ -264,8 +264,8 @@ chore(upstream): 상류 d003372..b55ceb1 반영 (intercept 토큰 계량) + 신�
 그래서 CI 를 확인할 때는 항상 저장소를 명시합니다.
 
 ```bash
-gh run list -R jiwoochris/artex-ko --workflow ci.yml --limit 5
-gh run list -R jiwoochris/artex-ko --workflow detections.yml --limit 5
+gh run list -R jiwoochris/artex-global --workflow ci.yml --limit 5
+gh run list -R jiwoochris/artex-global --workflow detections.yml --limit 5
 ```
 
 한 번 설정해 두면 `-R` 를 생략해도 우리 저장소를 기본으로 보도록 바꿀 수 있습니다. 다만 이
@@ -273,8 +273,8 @@ gh run list -R jiwoochris/artex-ko --workflow detections.yml --limit 5
 지정해야 합니다.
 
 ```bash
-gh repo set-default jiwoochris/artex-ko
-gh repo set-default --view   # jiwoochris/artex-ko 가 보이는지 확인
+gh repo set-default jiwoochris/artex-global
+gh repo set-default --view   # jiwoochris/artex-global 가 보이는지 확인
 ```
 
 ### 8.2 문서의 외부 링크는 브라우저처럼 GET 으로 확인합니다
@@ -354,7 +354,7 @@ git push origin v0.3.15
 - **release.** 모든 zip 을 모아 `SHA256SUMS` 체크섬을 만들고, GitHub Release 를 생성해 zip 과
   체크섬을 첨부합니다.
 - **docker.** binaries 가 교차 컴파일한 linux 바이너리를 받아 멀티아키텍처(amd64·arm64) 이미지를
-  빌드하고 GitHub Container Registry 의 `ghcr.io/jiwoochris/artex-ko` 에 릴리스 태그와 `latest`
+  빌드하고 GitHub Container Registry 의 `ghcr.io/jiwoochris/artex-global` 에 릴리스 태그와 `latest`
   로 올립니다. 로그인은 워크플로 기본 `GITHUB_TOKEN`(잡 권한 `packages: write`)으로 하므로 따로
   둘 시크릿이 없습니다.
 
@@ -380,7 +380,7 @@ git push origin v0.3.15
 
 ### 9.4 Docker 이미지 네임스페이스
 
-이미지는 이 포크가 소유한 `ghcr.io/jiwoochris/artex-ko` 로 발행하고, `docker-compose.yml` 도 이
+이미지는 이 포크가 소유한 `ghcr.io/jiwoochris/artex-global` 로 발행하고, `docker-compose.yml` 도 이
 이미지를 받습니다(2026-10-11 결정, `work/DECISIONS-FOR-JIWOO.md` 8번 항목). 상류의
 `autumn27/artex` 는 Docker Hub 에서 내려갔고 이 포크에는 push 권한도 없어 쓰지 않습니다.
 GHCR 패키지는 처음 발행될 때 비공개로 만들어질 수 있으니, 첫 릴리스 뒤 패키지 설정에서 공개

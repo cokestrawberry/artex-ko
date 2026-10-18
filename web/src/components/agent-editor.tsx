@@ -35,6 +35,7 @@ import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { getDateLocale } from "@/i18n/datetime";
 import { useAgentLabels } from "@/lib/agent-i18n";
 import { api } from "@/lib/api";
 import type {
@@ -507,7 +508,7 @@ export function AgentEditor({ agentKey, onSaved }: { agentKey: string; onSaved?:
                   <span className="text-muted-foreground truncate flex-1">{ver.note}</span>
                   {ver.ts && (
                     <span className="text-muted-foreground/60 shrink-0 tabular-nums">
-                      {new Date(ver.ts).toLocaleDateString("ko-KR", {
+                      {new Date(ver.ts).toLocaleDateString(getDateLocale(), {
                         month: "2-digit",
                         day: "2-digit",
                         hour: "2-digit",
@@ -550,7 +551,7 @@ export function AgentEditor({ agentKey, onSaved }: { agentKey: string; onSaved?:
                   {viewVer?.note || tr("version.noNote")}
                   {viewVer?.ts && (
                     <span className="ml-2 text-muted-foreground/60">
-                      {new Date(viewVer.ts).toLocaleString("ko-KR")}
+                      {new Date(viewVer.ts).toLocaleString(getDateLocale())}
                     </span>
                   )}
                 </DialogDescription>

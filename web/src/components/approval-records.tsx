@@ -26,6 +26,7 @@ import { Field, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { getDateLocale } from "@/i18n/datetime";
 import { useAgentNameByKey } from "@/lib/agent-i18n";
 import { api } from "@/lib/api";
 import type {
@@ -41,7 +42,7 @@ type Translator = ReturnType<typeof useTranslations>;
 
 function fmtTime(value?: string) {
   if (!value) return "—";
-  return new Date(value).toLocaleString("ko-KR", {
+  return new Date(value).toLocaleString(getDateLocale(), {
     month: "2-digit",
     day: "2-digit",
     hour: "2-digit",

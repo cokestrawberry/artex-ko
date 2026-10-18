@@ -54,6 +54,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Spinner } from "@/components/ui/spinner";
 import { useSideQuestions } from "@/hooks/use-side-questions";
+import { getDateLocale } from "@/i18n/datetime";
 import { mergeActivities } from "@/lib/activity-merge";
 import { useAgentLabels } from "@/lib/agent-i18n";
 import { api } from "@/lib/api";
@@ -991,7 +992,7 @@ const ConversationItem = React.memo(function ConversationItem({
               </>
             )}
             <span className="shrink-0">
-              {new Date(conv.created_at).toLocaleDateString("ko-KR", {
+              {new Date(conv.created_at).toLocaleDateString(getDateLocale(), {
                 month: "numeric",
                 day: "numeric",
                 hour: "2-digit",
