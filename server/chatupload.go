@@ -3,6 +3,8 @@ package server
 import (
 	"encoding/json"
 	"fmt"
+	"io"
+	"mime/multipart"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -110,8 +112,8 @@ func (s *Server) chatUpload(w http.ResponseWriter, r *http.Request) {
 		if name == "" || name == "." || name == ".." || strings.ContainsAny(name, `/\`) {
 			continue
 		}
-		dest := uniqueUploadPath(dir, name)
-		if err := saveUpload(hdr, dest); err != nil {
+		dest, err := saveUniqueChatUpload(hdr, dir, name)
+		if err != nil {
 			writeErr(w, 500, errChatUploadSaveFailed+err.Error())
 			return
 		}
@@ -119,6 +121,41 @@ func (s *Server) chatUpload(w http.ResponseWriter, r *http.Request) {
 		out = append(out, chatAttachment{Name: base, Path: "uploads/" + base, Size: hdr.Size, Abs: dest})
 	}
 	writeJSON(w, 200, map[string]any{"attachments": out})
+}
+
+// saveUniqueChatUpload reserves a filename atomically before writing its contents.
+func saveUniqueChatUpload(hdr *multipart.FileHeader, dir, name string) (string, error) {
+	input, err := hdr.Open()
+	if err != nil {
+		return "", err
+	}
+	defer input.Close()
+
+	ext := filepath.Ext(name)
+	stem := strings.TrimSuffix(name, ext)
+	for suffix := 0; ; suffix++ {
+		candidate := filepath.Join(dir, name)
+		if suffix > 0 {
+			candidate = filepath.Join(dir, fmt.Sprintf("%s-%d%s", stem, suffix, ext))
+		}
+		output, err := os.OpenFile(candidate, os.O_WRONLY|os.O_CREATE|os.O_EXCL, 0o644)
+		if os.IsExist(err) {
+			continue
+		}
+		if err != nil {
+			return "", err
+		}
+		_, copyErr := io.Copy(output, input)
+		closeErr := output.Close()
+		if copyErr != nil || closeErr != nil {
+			_ = os.Remove(candidate)
+			if copyErr != nil {
+				return "", copyErr
+			}
+			return "", closeErr
+		}
+		return candidate, nil
+	}
 }
 
 // uniqueUploadPath returns dir/name, or dir/name-1, dir/name-2… when it already exists,
