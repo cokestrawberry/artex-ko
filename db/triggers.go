@@ -160,6 +160,8 @@ type TaskEvent struct {
 	ToolInput  string `json:"tool_input"`  // tool-call only: 入参(JSON 文本)
 	ToolOutput string `json:"tool_output"` // tool-call only: 返回内容
 	ToolIsErr  bool   `json:"tool_is_err"` // tool-call only: 工具返回是否为错误
+	// timeout only: when the task entered status='timeout' (zero if never stamped)
+	CompletedAt time.Time `json:"completed_at"`
 }
 
 // NewFindingsSince returns findings with node id > lastID across all live tasks,
@@ -189,13 +191,15 @@ ORDER BY n.id`, lastID)
 	return out, rows.Err()
 }
 
-// TimedOutTasksSince returns tasks that reached status='timeout' with id > lastID,
-// ordered by id (monotonic watermark → no double-fire across restarts).
-func (d *DB) TimedOutTasksSince(lastID int64) ([]TaskEvent, error) {
+// TimedOutTasks returns every live task in status='timeout' with the time it
+// entered that status, in timeout order. Task ids do not follow timeout order and
+// a re-run task can time out again, so the scheduler deduplicates by
+// (task id, completed_at) rather than an id watermark.
+func (d *DB) TimedOutTasks() ([]TaskEvent, error) {
 	rows, err := d.Query(`
-SELECT id, description, goal FROM tasks
-WHERE status='timeout' AND deleted_at IS NULL AND id > $1
-ORDER BY id`, lastID)
+SELECT id, description, goal, completed_at FROM tasks
+WHERE status='timeout' AND deleted_at IS NULL
+ORDER BY completed_at, id`)
 	if err != nil {
 		return nil, err
 	}
@@ -203,11 +207,13 @@ ORDER BY id`, lastID)
 	out := []TaskEvent{}
 	for rows.Next() {
 		var e TaskEvent
-		if err := rows.Scan(&e.NodeID, &e.TaskDesc, &e.TaskGoal); err != nil {
+		var completedAt sql.NullTime
+		if err := rows.Scan(&e.NodeID, &e.TaskDesc, &e.TaskGoal, &completedAt); err != nil {
 			return nil, err
 		}
-		e.TaskID = e.NodeID // task id doubles as NodeID for the watermark
+		e.TaskID = e.NodeID
 		e.Summary = e.TaskGoal
+		e.CompletedAt = completedAt.Time
 		out = append(out, e)
 	}
 	return out, rows.Err()
