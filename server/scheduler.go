@@ -28,7 +28,7 @@ type Scheduler struct {
 const (
 	schedKeyLastFinding    = "last_finding_id"    // watermark: max finding node id fired for
 	schedKeyFiredGoals     = "fired_goals"        // JSON array of goal node ids already fired
-	schedKeyLastTimeout    = "last_timeout_id"    // watermark: max task id fired for task timeout
+	schedKeyFiredTimeouts  = "fired_timeout_ids"  // persisted ids of processed timeouts
 	schedKeyLastToolCall   = "last_toolcall_id"   // watermark: max activity id fired for tool call
 	schedKeyLastTaskCreate = "last_taskcreate_id" // watermark: max task id fired for task create
 )
@@ -42,7 +42,7 @@ func (sc *Scheduler) Run(ctx context.Context) {
 	if sc.pg == nil {
 		return
 	}
-	sc.init()
+	initialized := sc.init()
 	t := time.NewTicker(sc.tick)
 	defer t.Stop()
 	for {
@@ -50,6 +50,12 @@ func (sc *Scheduler) Run(ctx context.Context) {
 		case <-ctx.Done():
 			return
 		case <-t.C:
+			if !initialized {
+				initialized = sc.init()
+				if !initialized {
+					continue
+				}
+			}
 			sc.s.reconcileConcurrency() // 并发上限:有空位就把排队任务补位启动
 			sc.step()
 		}
@@ -58,7 +64,7 @@ func (sc *Scheduler) Run(ctx context.Context) {
 
 // init seeds the watermarks on first run so pre-existing findings/goals don't all
 // fire at once — only events created AFTER the scheduler first starts count.
-func (sc *Scheduler) init() {
+func (sc *Scheduler) init() bool {
 	if sc.mustState(schedKeyLastFinding) == "" {
 		var maxID int64
 		if evs, err := sc.pg.NewFindingsSince(0); err == nil {
@@ -67,8 +73,12 @@ func (sc *Scheduler) init() {
 					maxID = e.NodeID
 				}
 			}
+		} else {
+			return false
 		}
-		_ = sc.pg.SetSchedState(schedKeyLastFinding, strconv.FormatInt(maxID, 10))
+		if err := sc.pg.SetSchedState(schedKeyLastFinding, strconv.FormatInt(maxID, 10)); err != nil {
+			return false
+		}
 	}
 	if sc.mustState(schedKeyFiredGoals) == "" {
 		set := map[int64]bool{}
@@ -76,19 +86,23 @@ func (sc *Scheduler) init() {
 			for _, e := range evs {
 				set[e.NodeID] = true
 			}
+		} else {
+			return false
 		}
 		sc.saveFiredGoalSet(set)
 	}
-	if sc.mustState(schedKeyLastTimeout) == "" {
-		var maxID int64
-		if evs, err := sc.pg.TimedOutTasksSince(0); err == nil {
-			for _, e := range evs {
-				if e.NodeID > maxID {
-					maxID = e.NodeID
-				}
-			}
+	if sc.mustState(schedKeyFiredTimeouts) == "" {
+		events, err := sc.pg.TimedOutTasksSince(0)
+		if err != nil {
+			return false
 		}
-		_ = sc.pg.SetSchedState(schedKeyLastTimeout, strconv.FormatInt(maxID, 10))
+		fired := make(map[int64]bool, len(events))
+		for _, event := range events {
+			fired[event.NodeID] = true
+		}
+		if !sc.saveIDSet(schedKeyFiredTimeouts, fired) {
+			return false
+		}
 	}
 	if sc.mustState(schedKeyLastToolCall) == "" {
 		var maxID int64
@@ -98,8 +112,12 @@ func (sc *Scheduler) init() {
 					maxID = e.NodeID
 				}
 			}
+		} else {
+			return false
 		}
-		_ = sc.pg.SetSchedState(schedKeyLastToolCall, strconv.FormatInt(maxID, 10))
+		if err := sc.pg.SetSchedState(schedKeyLastToolCall, strconv.FormatInt(maxID, 10)); err != nil {
+			return false
+		}
 	}
 	if sc.mustState(schedKeyLastTaskCreate) == "" {
 		var maxID int64
@@ -109,9 +127,14 @@ func (sc *Scheduler) init() {
 					maxID = e.NodeID
 				}
 			}
+		} else {
+			return false
 		}
-		_ = sc.pg.SetSchedState(schedKeyLastTaskCreate, strconv.FormatInt(maxID, 10))
+		if err := sc.pg.SetSchedState(schedKeyLastTaskCreate, strconv.FormatInt(maxID, 10)); err != nil {
+			return false
+		}
 	}
+	return true
 }
 
 func (sc *Scheduler) step() {
@@ -232,26 +255,24 @@ func (sc *Scheduler) fireTaskTimeouts(triggers []*db.AgentTrigger) {
 			want = append(want, tr)
 		}
 	}
-	last, _ := strconv.ParseInt(sc.mustState(schedKeyLastTimeout), 10, 64)
-	events, err := sc.pg.TimedOutTasksSince(last)
+	fired := sc.readIDSet(schedKeyFiredTimeouts)
+	events, err := sc.pg.TimedOutTasksSince(0)
 	if err != nil || len(events) == 0 {
 		return
 	}
-	// Advance the watermark even with no active trigger — see fireFindings.
-	maxID := last
-	for _, e := range events {
-		if e.NodeID > maxID {
-			maxID = e.NodeID
-		}
-		if len(want) == 0 {
+	for _, event := range events {
+		if fired[event.NodeID] {
 			continue
 		}
 		msgCtx := "\n\n【本次由任务超时触发】"
-		for _, tr := range want {
-			sc.s.StartTriggeredRun(tr.AgentKey, fmt.Sprintf("超时触发 · task#%d", e.TaskID), tr.TaskTimeoutMessage+msgCtx, e.TaskID, true, e.TaskDesc, e.TaskGoal)
+		for _, trigger := range want {
+			sc.s.StartTriggeredRun(trigger.AgentKey, fmt.Sprintf("超时触发 · task#%d", event.TaskID), trigger.TaskTimeoutMessage+msgCtx, event.TaskID, true, event.TaskDesc, event.TaskGoal)
 		}
+		fired[event.NodeID] = true
 	}
-	_ = sc.pg.SetSchedState(schedKeyLastTimeout, strconv.FormatInt(maxID, 10))
+	if !sc.saveIDSet(schedKeyFiredTimeouts, fired) {
+		log.Printf("[scheduler] failed to save processed timeout ids")
+	}
 }
 
 // fireTaskCreates fires on_task_create triggers for tasks newly created above the
@@ -378,4 +399,28 @@ func (sc *Scheduler) saveFiredGoalSet(set map[int64]bool) {
 	if err := sc.pg.SetSchedState(schedKeyFiredGoals, string(b)); err != nil {
 		log.Printf("[scheduler] save fired goals failed: %v", err)
 	}
+}
+
+
+func (sc *Scheduler) readIDSet(key string) map[int64]bool {
+	result := map[int64]bool{}
+	var ids []int64
+	if json.Unmarshal([]byte(sc.mustState(key)), &ids) == nil {
+		for _, id := range ids {
+			result[id] = true
+		}
+	}
+	return result
+}
+
+func (sc *Scheduler) saveIDSet(key string, set map[int64]bool) bool {
+	ids := make([]int64, 0, len(set))
+	for id := range set {
+		ids = append(ids, id)
+	}
+	data, err := json.Marshal(ids)
+	if err != nil {
+		return false
+	}
+	return sc.pg.SetSchedState(key, string(data)) == nil
 }
