@@ -89,7 +89,9 @@ func (sc *Scheduler) init() bool {
 		} else {
 			return false
 		}
-		sc.saveFiredGoalSet(set)
+		if !sc.saveIDSet(schedKeyFiredGoals, set) {
+			return false
+		}
 	}
 	if sc.mustState(schedKeyFiredTimeouts) == "" {
 		events, err := sc.pg.TimedOutTasksSince(0)
